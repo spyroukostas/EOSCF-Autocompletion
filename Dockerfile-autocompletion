@@ -1,12 +1,12 @@
-FROM python:3.9
+FROM python:3.10
 
 WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
-RUN python -m spacy download en_core_web_sm
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 COPY . /app
 
-CMD ["python3.9", "recommendation_system_app.py", "--config_file", "app/config/backend-providers-recommender-prod.yaml"]
+CMD ["python3.10", "recommendation_system_app.py", "--config_file", "app/config/backend-providers-recommender-prod.yaml"]

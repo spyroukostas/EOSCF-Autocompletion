@@ -1,7 +1,10 @@
+import logging
 from typing import Optional
 
 import pandas as pd
 import requests
+
+logger = logging.getLogger(__name__)
 from app.databases.registry.registry_abc import Registry
 from app.exceptions import (APIResponseError, APIResponseFormatException,
                             IdNotExists, RegistryMethodNotImplemented)
@@ -158,12 +161,20 @@ class CatalogueAPI(Registry):
             raise IdNotExists(f"Category id {category_id} does not exist!")
 
     def get_vocabulary(self, vocabulary_type: str) -> list:
-        return [item["id"] for item in
-                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")]
+        try:
+            response = self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")
+        except APIResponseError:
+            logger.warning(f"Could not fetch vocabulary '{vocabulary_type}' from API.")
+            return []
+        return [item["id"] for item in (response or [])]
 
     def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
-        return [(item["id"], item["name"]) for item in
-                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")]
+        try:
+            response = self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")
+        except APIResponseError:
+            logger.warning(f"Could not fetch vocabulary '{vocabulary_type}' from API.")
+            return []
+        return [(item["id"], item["name"]) for item in (response or [])]
 
     def get_providers_names(self):
         # TODO currently we have hardcoded 8000 as maximum quantity

@@ -192,28 +192,28 @@ def _populate_catalog_db(db):
     services_collection = db["service"]
     # Populate services collection
     # TODO currently we have hardcoded 800 as maximum quantity
-    services_collection.insert_many(_get_request("https://api.eosc-portal.eu/service/all?catalogue_id=eosc&quantity=800")["results"])
+    services_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/service/all?quantity=10000")["results"])
 
     # Create a collection of categories
     category_collection = db["category"]
     # Populate the category collection
-    category_collection.insert_many(_get_request("https://api.eosc-portal.eu/vocabulary/byType/SUBCATEGORY"))
+    category_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/SUBCATEGORY"))
 
     # Create a collection of scientific domains
     scientific_domain_collection = db["scientific_domain"]
     # Populate scientific domain collection
-    scientific_domain_collection.insert_many(_get_request("https://api.eosc-portal.eu/vocabulary/byType/SCIENTIFIC_SUBDOMAIN"))
+    scientific_domain_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/SCIENTIFIC_SUBDOMAIN"))
 
     # Create a collection of target_users
     target_users_collection = db["target_user"]
     # Populate the target users collection
-    target_users_collection.insert_many(_get_request("https://api.eosc-portal.eu/vocabulary/byType/TARGET_USER"))
+    target_users_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/TARGET_USER"))
 
     # Create a collection of providers
     providers_collection = db["provider"]
     # Populate the target users collection
     # TODO currently we have hardcoded 400 as maximum quantity
-    providers_collection.insert_many(_get_request("https://api.eosc-portal.eu/provider/all?catalogue_id=eosc&quantity=400")["results"])
+    providers_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/provider/all?quantity=10000")["results"])
 
 
 if __name__ == '__main__':

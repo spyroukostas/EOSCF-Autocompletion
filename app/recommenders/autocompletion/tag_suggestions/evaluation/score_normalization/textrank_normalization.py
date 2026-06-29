@@ -19,7 +19,7 @@ def get_tags_with_score(text_of_service):
 
 def get_textrank_scores_of_all_services():
     print("Requesting all services...", end='')
-    services = requests.get("https://api.eosc-portal.eu/service/all?catalogue_id=eosc&quantity=20").json()["results"]
+    services = requests.get("https://api.providers.sandbox.eosc-beyond.eu/service/all?quantity=1000").json()["results"]
     print("Done")
 
     textrank_scores = []

@@ -10,7 +10,7 @@ from app.exceptions import (APIResponseError, APIResponseFormatException,
 class CatalogueAPI(Registry):
     def __init__(self):
         super().__init__()
-        self.catalogue_base_url = "https://api.eosc-portal.eu"
+        self.catalogue_base_url = "https://api.providers.sandbox.eosc-beyond.eu"
 
     def check_health(self) -> Optional[str]:
         try:
@@ -51,7 +51,7 @@ class CatalogueAPI(Registry):
     def get_services_by_ids(self, ids, attributes=None, remove_generic_attributes=False):
         services = []
         for service_id in ids:
-            service = self._get_request(f"{self.catalogue_base_url}/resource/{service_id}?catalogue_id=eosc")
+            service = self._get_request(f"{self.catalogue_base_url}/resource/{service_id}")
             if service is None:
                 raise IdNotExists(f"Service id {service_id} does not exist!")
             services.append(self._reformat_service(service))
@@ -78,7 +78,7 @@ class CatalogueAPI(Registry):
             attributes = []
 
         # TODO currently we have hardcoded 8000 as maximum quantity
-        response = self._get_request(f"{self.catalogue_base_url}/service/all?catalogue_id=eosc&quantity=8000")
+        response = self._get_request(f"{self.catalogue_base_url}/service/all?quantity=8000")
 
         try:
             if reformat:
@@ -100,7 +100,7 @@ class CatalogueAPI(Registry):
         return services_df
 
     def get_service(self, service_id, reformat=True, remove_generic_attributes=True):
-        service = self._get_request(f"{self.catalogue_base_url}/resource/{service_id}?catalogue_id=eosc")
+        service = self._get_request(f"{self.catalogue_base_url}/resource/{service_id}")
 
         if service is None:
             raise IdNotExists(f"Service id {service_id} does not exist!")
@@ -165,7 +165,7 @@ class CatalogueAPI(Registry):
         # TODO currently we have hardcoded 8000 as maximum quantity
         return [item["name"] for item in
                 self._get_request(f"{self.catalogue_base_url}/public/provider/"
-                                  f"all?catalogue_id=eosc&quantity=8000")["results"]]
+                                  f"all?quantity=8000")["results"]]
 
     def _remove_general_attributes_from_services(self, services):
         attributes = ['scientific_domains', 'categories', 'target_users']

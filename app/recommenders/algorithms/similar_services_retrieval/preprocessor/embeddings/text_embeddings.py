@@ -5,7 +5,7 @@ from app.databases.redis_db import (check_key_existence, delete_object,
                                     get_object, store_object)
 from app.databases.registry.registry_selector import get_registry
 from app.exceptions import (DeprecatedMethod, IdNotExists, MissingAttribute,
-                            MissingStructure, NoneServices)
+                            MissingStructure)
 from app.recommenders.algorithms.similar_services_retrieval.preprocessor.sentence_filtering.service_text import \
     ServiceText
 from app.settings import APP_SETTINGS
@@ -59,7 +59,9 @@ def create_text_embeddings(resource_type=None):
         id_col = "service_id"
 
     if resources.empty:
-        raise NoneServices
+        logger.warning(f"No resources found for resource type '{resource_type}'. Skipping text embeddings creation.")
+        return []
+
 
     service_texts = [ServiceText(resource[text_attributes]) for _, resource in resources.iterrows()]
     resource_ids = resources[id_col]

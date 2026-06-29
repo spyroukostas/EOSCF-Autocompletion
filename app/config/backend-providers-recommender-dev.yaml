@@ -21,7 +21,7 @@ SIMILAR_SERVICES:
 
   METHOD: "SBERT" # tf-idf or SBERT
   SBERT:
-    MODEL_NAME: 'paraphrase-MiniLM-L6-v2'
+    MODEL_NAME: 'all-MiniLM-L6-v2'
     DEVICE: "cpu"
 
 PROJECT_COMPLETION:

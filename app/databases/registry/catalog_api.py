@@ -38,8 +38,9 @@ class CatalogueAPI(Registry):
         return scientific_subdomains, subcategories
 
     def _reformat_service(self, service):
-        scientific_subdomains, subcategories = self._get_leaves_of_metadata_hierarchies(service["scientificDomains"],
-                                                                                        service["categories"])
+        scientific_subdomains, subcategories = self._get_leaves_of_metadata_hierarchies(
+            service.get("scientificDomains") or [],
+            service.get("categories") or [])
 
         service["categories"] = subcategories
         service["scientific_domains"] = scientific_subdomains

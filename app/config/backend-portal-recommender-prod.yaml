@@ -17,7 +17,7 @@ SPACY_MODEL: "en_core_web_sm"
 
 SIMILAR_SERVICES:
   METADATA: ["categories", "scientific_domains"]
-  TEXT_ATTRIBUTES: ["tagline", "description"]
+  TEXT_ATTRIBUTES: ["description"]
 
   METADATA_WEIGHT: 0.25
   VIEWED_WEIGHT: 0.5
@@ -40,7 +40,7 @@ PROJECT_COMPLETION:
 AUTO_COMPLETION:
   RESOURCE_TYPES:
     service:
-      TEXT_ATTRIBUTES: ["tagline", "description"]
+      TEXT_ATTRIBUTES: ["description"]
       ENUMERATED_FIELDS:
         categories:
           VOCABULARY_TYPE: "SUBCATEGORY"

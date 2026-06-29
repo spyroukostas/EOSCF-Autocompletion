@@ -30,7 +30,7 @@ PROJECT_COMPLETION:
 AUTO_COMPLETION:
   RESOURCE_TYPES:
     service:
-      TEXT_ATTRIBUTES: ["tagline", "description"]
+      TEXT_ATTRIBUTES: ["description"]
       ENUMERATED_FIELDS:
         categories:
           VOCABULARY_TYPE: "SUBCATEGORY"
@@ -97,7 +97,7 @@ AUTO_COMPLETION:
     #       CONSIDERED_SERVICES_THRESHOLD: 5
     #       FREQUENCY_THRESHOLD: 0.1
     # deployable_application:
-    #   TEXT_ATTRIBUTES: ["tagline", "description"]
+    #   TEXT_ATTRIBUTES: ["description"]
     #   ENUMERATED_FIELDS:
     #     scientific_domains:
     #       VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"

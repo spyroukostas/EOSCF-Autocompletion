@@ -88,12 +88,13 @@ class CatalogueAPI(Registry):
         except KeyError as e:
             raise APIResponseFormatException(f"{e} does not exist in the response's fields")
 
+        cols = list(set(["service_id"] + attributes))
         if len(services):
             services_df = pd.DataFrame(services)
             services_df.rename(columns={'id': 'service_id'}, inplace=True)
-            services_df = services_df[list(set(["service_id"] + attributes))]
+            services_df = services_df.reindex(columns=cols, fill_value="")
         else:  # If there are no services
-            services_df = pd.DataFrame(columns=list(set(["service_id"] + attributes)))
+            services_df = pd.DataFrame(columns=cols)
 
         self._remove_general_attributes_from_services(services_df)
 
@@ -255,12 +256,13 @@ class CatalogueAPI(Registry):
         except KeyError as e:
             raise APIResponseFormatException(f"{e} does not exist in the response's fields")
 
+        cols = list(set(["service_id"] + attributes))
         if len(resources):
             df = pd.DataFrame(resources)
             df.rename(columns={"id": "service_id"}, inplace=True)
-            df = df[list(set(["service_id"] + attributes))]
+            df = df.reindex(columns=cols, fill_value="")
         else:
-            df = pd.DataFrame(columns=list(set(["service_id"] + attributes)))
+            df = pd.DataFrame(columns=cols)
 
         return df
 

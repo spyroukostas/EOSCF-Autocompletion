@@ -145,13 +145,9 @@ class CatalogueAPI(Registry):
                 for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SUBCATEGORY")]
 
     def get_upper_categories_id_and_name(self):
-        supercategory = [(item["id"], item["name"])
-                         for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SUPERCATEGORY")]
-
-        category = [(item["id"], item["name"])
-                    for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/CATEGORY")]
-
-        return supercategory + category
+        return [(item["id"], item["name"])
+                for item in (self._get_request(
+                    f"{self.catalogue_base_url}/vocabulary/byType/CATEGORY") or [])]
 
     def get_specific_category_name(self, category_id):
         res = self._get_request(f"{self.catalogue_base_url}/vocabulary/{category_id}")

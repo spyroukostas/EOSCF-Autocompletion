@@ -37,14 +37,16 @@ class CatalogueAPI(Registry):
 
         return scientific_subdomains, subcategories
 
+    def _normalize_domain_category_fields(self, r: dict) -> None:
+        subdomains, subcategories = self._get_leaves_of_metadata_hierarchies(
+            r.pop("scientificDomains", None) or [],
+            r.pop("categories", None) or []
+        )
+        r["scientific_domains"] = subdomains
+        r["categories"] = subcategories
+
     def _reformat_service(self, service):
-        scientific_subdomains, subcategories = self._get_leaves_of_metadata_hierarchies(
-            service.get("scientificDomains") or [],
-            service.get("categories") or [])
-
-        service["categories"] = subcategories
-        service["scientific_domains"] = scientific_subdomains
-
+        self._normalize_domain_category_fields(service)
         return service
 
     # TODO change to one call
@@ -221,11 +223,7 @@ class CatalogueAPI(Registry):
             r["access_rights"] = [r.pop("accessRights")] if r.get("accessRights") else []
 
         elif resource_type == "datasource":
-            if "scientificDomains" in r:
-                subdomains, subcategories = self._get_leaves_of_metadata_hierarchies(
-                    r.pop("scientificDomains", []), r.pop("categories", []))
-                r["scientific_domains"] = subdomains
-                r["categories"] = subcategories
+            self._normalize_domain_category_fields(r)
             r["datasource_classification"] = [r.pop("datasourceClassification")] if r.get("datasourceClassification") else []
             r["research_product_types"] = r.pop("researchProductTypes", []) or []
             r["jurisdiction"] = [r.pop("jurisdiction")] if r.get("jurisdiction") else []
@@ -241,9 +239,7 @@ class CatalogueAPI(Registry):
             r["package"] = r.pop("package", []) or []
 
         elif resource_type == "deployable_application":
-            if "scientificDomains" in r:
-                subdomains = [item["scientificSubdomain"] for item in r.pop("scientificDomains", [])]
-                r["scientific_domains"] = subdomains
+            self._normalize_domain_category_fields(r)
 
         return r
 

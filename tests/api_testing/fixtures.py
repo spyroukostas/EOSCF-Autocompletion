@@ -115,13 +115,13 @@ def onboarded_service():
     return {
         "request":
             {
+                "resource_type": "service",
                 "new_service": {
                     "tagline": "Compute compute compute",
                     "description": "Cloud compute cloud storage compute compute Compute compute compute"
                 },
                 "fields_to_suggest": [
                     "categories",
-                    "target_users",
                     "scientific_domains"
                 ],
                 "maximum_suggestions": 3
@@ -134,14 +134,6 @@ def onboarded_service():
                         "subcategory-access_physical_and_eInfrastructures-compute-container_management",
                         "subcategory-access_physical_and_eInfrastructures-compute-virtual_machine_management",
                         "subcategory-access_physical_and_eInfrastructures-compute-other"
-                    ]
-                },
-                {
-                    "field_name": "target_users",
-                    "suggestions": [
-                        "target_user-research_organisations",
-                        "target_user-businesses",
-                        "target_user-researchers"
                     ]
                 },
                 {

@@ -44,10 +44,10 @@ SCHEDULING:  # Decides the frequency of updating the internal structures of the 
 
 SPACY_MODEL: "en_core_web_sm"  # Used for text processing. Using a bigger model did not affect performance.
 
-SIMILAR_SERVICES:
-  TEXT_ATTRIBUTES: ["tagline", "description"]  # Which text attributes of the services to use for the model
+SIMILAR_SERVICES:  # Used in PORTAL-RECOMMENDER mode only; controls the similar-services pipeline
+  TEXT_ATTRIBUTES: ["tagline", "description"]  # Text attributes used for SBERT embeddings
 
-  SENTENCE_FILTERING_METHOD: "KEYWORD"  # Possible values "NONE", "KEYWORD", "NER". Which technique to use to filter out non informative sentences.
+  SENTENCE_FILTERING_METHOD: "KEYWORD"  # Possible values "NONE", "KEYWORD", "NER". Filters uninformative sentences before embedding.
 
   METHOD: "SBERT"  # Method used for calculating text embeddings. Currently only SBERT is supported.
   SBERT:  # SBERT configuration
@@ -55,30 +55,128 @@ SIMILAR_SERVICES:
     DEVICE: "cpu"
 
 AUTO_COMPLETION:  # Configuration for the auto-completion model
-  ENUMERATED_FIELDS:  # Metadata fields configuration
-    categories:
-      SIMILARITY_THRESHOLD: 0.5  # Threshold for considering a service similar to the onboarding service
-      CONSIDERED_SERVICES_THRESHOLD: 5  # Max number of services to consider
-      FREQUENCY_THRESHOLD: 0.1 # Threshold for considering a proposed category frequent
+  RESOURCE_TYPES:   # One entry per resource type to enable autocompletion for
+    service:
+      TEXT_ATTRIBUTES: ["tagline", "description"]  # Text fields embedded with SBERT for this type
+      ENUMERATED_FIELDS:  # Fields to suggest values for
+        categories:
+          VOCABULARY_TYPE: "SUBCATEGORY"   # Vocabulary type from /vocabulary/byType/<TYPE>
+          SIMILARITY_THRESHOLD: 0.5  # Min similarity to treat a resource as "similar"
+          CONSIDERED_SERVICES_THRESHOLD: 5  # Max number of similar resources to inspect
+          FREQUENCY_THRESHOLD: 0.1  # Value must appear in ≥10% of similar resources to be suggested
 
-    scientific_domains:
-      SIMILARITY_THRESHOLD: 0.5
-      CONSIDERED_SERVICES_THRESHOLD: 5
-      FREQUENCY_THRESHOLD: 0.1
+        scientific_domains:
+          VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
 
-    target_users:
-      SIMILARITY_THRESHOLD: 0.3
-      CONSIDERED_SERVICES_THRESHOLD: 5
-      FREQUENCY_THRESHOLD: 0.1
+        # Uncomment to add more fields for this resource type.
+        # The VOCABULARY_TYPE must be a valid EOSC vocabulary type string.
+        # access_types:
+        #   VOCABULARY_TYPE: "ACCESS_TYPE"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+
+        # trl:
+        #   VOCABULARY_TYPE: "TRL"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+
+        # order_type:
+        #   VOCABULARY_TYPE: "ORDER_TYPE"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+
+        # jurisdiction:
+        #   VOCABULARY_TYPE: "JURISDICTION"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+
+    # Uncomment to enable autocompletion for additional resource types.
+    # No code changes are required — just add the block here and restart the service.
+
+    # training_resource:
+    #   TEXT_ATTRIBUTES: ["title", "description"]
+    #   ENUMERATED_FIELDS:
+    #     target_groups:
+    #       VOCABULARY_TYPE: "TARGET_USER"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     expertise_level:
+    #       VOCABULARY_TYPE: "TR_EXPERTISE_LEVEL"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     learning_resource_types:
+    #       VOCABULARY_TYPE: "TR_DCMI_TYPE"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+
+    # datasource:
+    #   TEXT_ATTRIBUTES: ["name", "description"]
+    #   ENUMERATED_FIELDS:
+    #     scientific_domains:
+    #       VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     datasource_classification:
+    #       VOCABULARY_TYPE: "DS_CLASSIFICATION"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     jurisdiction:
+    #       VOCABULARY_TYPE: "DS_JURISDICTION"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+
+    # organisation:
+    #   TEXT_ATTRIBUTES: ["name", "description"]
+    #   ENUMERATED_FIELDS:
+    #     country:
+    #       VOCABULARY_TYPE: "COUNTRY"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     legal_status:
+    #       VOCABULARY_TYPE: "PROVIDER_LEGAL_STATUS"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+
+    # deployable_application:
+    #   TEXT_ATTRIBUTES: ["tagline", "description"]
+    #   ENUMERATED_FIELDS:
+    #     scientific_domains:
+    #       VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
 
   TAGS:
     KEYWORD_EXTRACTION_METHOD: "textrank"  # Method that will be used for initial keyword discovery
     SCORE_WEIGHT: 0.7  # Weight of the score when deciding which tags to propose
     MAX_WORDS: 3  # Max number of words in a tag
-    TEXT_ATTRIBUTES: ['tagline', 'description']  # Which text attributes to use for tag suggestion
     PHRASES_SIM_THRESHOLD: 0.7  # Threshold for considering two phrases similar
     PHRASES_EQUAL_THRESHOLD: 0.9  # Threshold for considering two phrases similar
+    # Note: TEXT_ATTRIBUTES for tag suggestion is taken per resource type from RESOURCE_TYPES above
 ```
+
+### Adding a new enumerated field
+
+To suggest values for an additional field (e.g. `trl`) on an existing resource type, add it under `ENUMERATED_FIELDS` in the YAML config with a valid `VOCABULARY_TYPE`. Available vocabulary types are listed in `ARCHITECTURE.md`. Restart the service and trigger `GET /v1/update` to rebuild the embeddings.
+
+### Enabling a new resource type
+
+To enable autocompletion for a new resource type (e.g. `training_resource`), uncomment or add a block under `AUTO_COMPLETION.RESOURCE_TYPES`. No code changes are required. The update loop will automatically build text embeddings for the new type on the next run (at startup or via `GET /v1/update`).
 
 ## Environmental Variables
 

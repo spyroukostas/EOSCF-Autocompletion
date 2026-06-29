@@ -64,7 +64,7 @@ class TagStructuresManager:
         logger.debug("Filtering tags...")
 
         sim_threshold = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["TAGS"]["PHRASES_SIM_THRESHOLD"]
-        tags, _ = enumerated_fields_filtering(tags, sim_threshold=sim_threshold)
+        tags, _ = enumerated_fields_filtering(tags, resource_type="service", sim_threshold=sim_threshold)
         tags = filter_based_on_manual_rules(tags)
 
         return tags

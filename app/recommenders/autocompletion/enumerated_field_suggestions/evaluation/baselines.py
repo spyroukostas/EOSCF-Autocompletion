@@ -67,7 +67,7 @@ def baseline_results(fields_values, services, max_suggestions_per_field):
 
 
 def random_baseline_results(max_suggestions_per_field=3):
-    fields = ["categories", "scientific_domains", "target_users"]
+    fields = ["categories", "scientific_domains"]
 
     db = get_registry()
     services = db.get_services(fields)
@@ -79,7 +79,7 @@ def random_baseline_results(max_suggestions_per_field=3):
 
 
 def most_popular_baseline_results(max_suggestions_per_field=3):
-    fields = ["categories", "scientific_domains", "target_users"]
+    fields = ["categories", "scientific_domains"]
 
     db = get_registry()
     services = db.get_services(fields)

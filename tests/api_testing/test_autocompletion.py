@@ -36,9 +36,8 @@ def test_autocompletion_suggest_field_names(onboarded_service):
     r = requests.post(url=f"{BASE_URL}/auto_completion/suggest",
                       json=onboarded_service['request'])
 
-    assert r.json()[0]['field_name'] in ['categories', 'target_users', 'scientific_domains']
-    assert r.json()[1]['field_name'] in ['categories', 'target_users', 'scientific_domains']
-    assert r.json()[2]['field_name'] in ['categories', 'target_users', 'scientific_domains']
+    assert r.json()[0]['field_name'] in ['categories', 'scientific_domains']
+    assert r.json()[1]['field_name'] in ['categories', 'scientific_domains']
 
 
 @pytest.mark.api
@@ -63,17 +62,6 @@ def test_autocompletion_suggest_categories(onboarded_service):
                       json=onboarded_service['request'])
 
     assert set(r.json()[0]['suggestions']) == set(onboarded_service['expected_response'][0]['suggestions'])
-
-
-@pytest.mark.api
-@pytest.mark.catalogue
-@pytest.mark.usefixtures("onboarded_service")
-@pytest.mark.xfail(reason='Fixture is not kept updated')
-def test_autocompletion_suggest_target_users(onboarded_service):
-    r = requests.post(url=f"{BASE_URL}/auto_completion/suggest",
-                      json=onboarded_service['request'])
-
-    assert r.json()[1]['suggestions'] == onboarded_service['expected_response'][1]['suggestions']
 
 
 @pytest.mark.api

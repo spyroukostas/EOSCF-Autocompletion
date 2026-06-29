@@ -8,13 +8,14 @@ The Autocompletion service has the goal of generating autocompletion suggestions
 
 Specifically the service currently suggests:
 
-- Scientific subdomains
-- Subcategories
+- Categorical fields (e.g. scientific domains, categories) — configurable per resource type
 - Tags
+
+The supported resource types and which fields are suggested for each are driven by the deployment configuration. See [Resource Types]({% link resource-types.md %}) for details on how to enable additional resource types or add new fields.
 
 ![assets/autocompletion_example.png](assets/autocompletion_example.png)
 
-The application is built as a microservice with a REST API that is deployed in the porviders infrastructure (from Athena).
+The application is built as a microservice with a REST API that is deployed in the providers infrastructure (from Athena).
 
 ## API
 

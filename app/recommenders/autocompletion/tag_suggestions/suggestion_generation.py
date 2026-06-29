@@ -14,28 +14,28 @@ from app.settings import APP_SETTINGS
 logger = logging.getLogger(__name__)
 
 
-def get_suggestions_for_tags(service_attributes, existing_values=None, max_num=3):
+def get_suggestions_for_tags(service_attributes, existing_values=None, max_num=3, resource_type="service"):
     """
     Returns a list of recommended tags
     Args:
-        service_attributes: dict with the name and value for each filled field of a service
+        service_attributes: dict with the name and value for each filled field of a resource
         existing_values: list[str], The list with the existing tags
         max_num: int, The maximum number of recommendations we want returned
+        resource_type: str, the type of resource being autocompleted
     """
 
-    text_attributes = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["TAGS"]["TEXT_ATTRIBUTES"]
+    text_attributes = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["RESOURCE_TYPES"][resource_type]["TEXT_ATTRIBUTES"]
 
     if not all(text_attribute in service_attributes for text_attribute in text_attributes):
         raise MissingAttribute("Resource does not have all necessary fields! Make sure that "
                                f"{text_attributes} are given!")
 
-    # Get the text attributes of the service
-    text_of_service = " ".join([attribute_value for attribute_key, attribute_value in service_attributes.items()
-                                if attribute_key in text_attributes])
+    text_of_service = " ".join([v for k, v in service_attributes.items() if k in text_attributes])
 
     candidate_tags = get_tag_candidates(text_of_service)
 
-    candidate_tags, filtered_enumerated_fields = filtering(candidate_tags, existing_values)
+    candidate_tags, filtered_enumerated_fields = filtering(candidate_tags, existing_values,
+                                                           resource_type=resource_type)
 
     candidate_tags = map_with_tags_corpus(candidate_tags)
 

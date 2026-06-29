@@ -42,7 +42,7 @@ The tag retriever component consists of the following sub-components:
 
 The auto-completion component consists of the following sub-components:
 
-- `MetadataAutoCompletion`, responsible for providing auto-completion functionality for metadata fields (i.e. scientific subdomain, subcategories) using the `Similar Services` component.
+- `MetadataAutoCompletion`, responsible for providing auto-completion functionality for configurable enumerated fields (e.g. scientific domains, categories) across multiple resource types using the `Similar Services` component. Which fields are suggested per resource type is driven by the deployment configuration — see [Resource Types]({% link resource-types.md %}).
 - `TagAutoCompletion`, responsible for providing auto-completion functionality for tags using the `Tag Retriever` component.
 - `AutoCompletion`, responsible for managing auto-completion functionality for metadata fields and tags.
 - `API Endpoint`, responsible for providing the API endpoints (`fastapi`) for the auto-completion functionality.

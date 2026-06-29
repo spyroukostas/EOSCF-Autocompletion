@@ -16,12 +16,7 @@ CREDENTIALS: "credentials.yml"
 SPACY_MODEL: "en_core_web_sm"
 
 SIMILAR_SERVICES:
-  METADATA: ["categories", "scientific_domains"]
-  TEXT_ATTRIBUTES: ["tagline", "description"]
   SENTENCE_FILTERING_METHOD: "NONE"
-  
-  METADATA_WEIGHT: 0.5
-  VIEWED_WEIGHT: 0.5
 
   METHOD: "SBERT" # tf-idf or SBERT
   SBERT:
@@ -29,31 +24,89 @@ SIMILAR_SERVICES:
     DEVICE: "cpu"
 
 PROJECT_COMPLETION:
-
   MIN_SUPPORT: 0.05
   MIN_CONFIDENCE: 0.5
 
 AUTO_COMPLETION:
-  ENUMERATED_FIELDS:
-    categories:
-      SIMILARITY_THRESHOLD: 0.5
-      CONSIDERED_SERVICES_THRESHOLD: 5
-      FREQUENCY_THRESHOLD: 0.1
-
-    scientific_domains:
-      SIMILARITY_THRESHOLD: 0.5
-      CONSIDERED_SERVICES_THRESHOLD: 5
-      FREQUENCY_THRESHOLD: 0.1
-
-    target_users:
-      SIMILARITY_THRESHOLD: 0.3
-      CONSIDERED_SERVICES_THRESHOLD: 5
-      FREQUENCY_THRESHOLD: 0.1
-
+  RESOURCE_TYPES:
+    service:
+      TEXT_ATTRIBUTES: ["tagline", "description"]
+      ENUMERATED_FIELDS:
+        categories:
+          VOCABULARY_TYPE: "SUBCATEGORY"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        scientific_domains:
+          VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        # access_types:
+        #   VOCABULARY_TYPE: "ACCESS_TYPE"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+        # trl:
+        #   VOCABULARY_TYPE: "TRL"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+        # jurisdiction:
+        #   VOCABULARY_TYPE: "JURISDICTION"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+        # order_type:
+        #   VOCABULARY_TYPE: "ORDER_TYPE"
+        #   SIMILARITY_THRESHOLD: 0.5
+        #   CONSIDERED_SERVICES_THRESHOLD: 5
+        #   FREQUENCY_THRESHOLD: 0.1
+    # training_resource:
+    #   TEXT_ATTRIBUTES: ["name", "description"]
+    #   ENUMERATED_FIELDS:
+    #     target_groups:
+    #       VOCABULARY_TYPE: "TARGET_USER"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     expertise_level:
+    #       VOCABULARY_TYPE: "TR_EXPERTISE_LEVEL"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    # datasource:
+    #   TEXT_ATTRIBUTES: ["name", "description"]
+    #   ENUMERATED_FIELDS:
+    #     scientific_domains:
+    #       VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    #     datasource_classification:
+    #       VOCABULARY_TYPE: "DS_CLASSIFICATION"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    # organisation:
+    #   TEXT_ATTRIBUTES: ["name", "description"]
+    #   ENUMERATED_FIELDS:
+    #     country:
+    #       VOCABULARY_TYPE: "COUNTRY"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
+    # deployable_application:
+    #   TEXT_ATTRIBUTES: ["tagline", "description"]
+    #   ENUMERATED_FIELDS:
+    #     scientific_domains:
+    #       VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+    #       SIMILARITY_THRESHOLD: 0.5
+    #       CONSIDERED_SERVICES_THRESHOLD: 5
+    #       FREQUENCY_THRESHOLD: 0.1
   TAGS:
     KEYWORD_EXTRACTION_METHOD: "textrank"
     SCORE_WEIGHT: 0.7
     MAX_WORDS: 3
-    TEXT_ATTRIBUTES: ['tagline', 'description']
     PHRASES_SIM_THRESHOLD: 0.7
     PHRASES_EQUAL_THRESHOLD: 0.9

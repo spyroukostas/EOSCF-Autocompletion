@@ -71,14 +71,6 @@ class Registry(ABC):
         pass
 
     @abstractmethod
-    def get_target_users(self):
-        pass
-
-    @abstractmethod
-    def get_target_users_id_and_name(self):
-        pass
-
-    @abstractmethod
     def get_providers_names(self):
         pass
 
@@ -100,6 +92,23 @@ class Registry(ABC):
 
     @abstractmethod
     def is_valid_user(self, user_id):
+        pass
+
+    @abstractmethod
+    def get_vocabulary(self, vocabulary_type: str) -> list:
+        pass
+
+    @abstractmethod
+    def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
+        pass
+
+    @abstractmethod
+    def get_resources_of_type(self, resource_type: str, attributes: list):
+        pass
+
+    @abstractmethod
+    def get_resources_by_ids(self, resource_type: str, ids: list, attributes: list = None,
+                             remove_generic_attributes: bool = False):
         pass
 
     @abstractmethod

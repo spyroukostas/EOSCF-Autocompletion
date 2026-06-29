@@ -11,7 +11,8 @@ from app.settings import APP_SETTINGS
 logger = logging.getLogger(__name__)
 
 
-def naive_search(fields, embeddings, embedding, similarity_threshold=None, considered_services_threshold=None):
+def naive_search(fields, embeddings, embedding, resource_type="service",
+                 similarity_threshold=None, considered_services_threshold=None):
 
     start_time = time.time()
     similarity_with_services = TextSimilaritiesManager().calculate_similarities_of_service(embedding, embeddings)
@@ -21,40 +22,36 @@ def naive_search(fields, embeddings, embedding, similarity_threshold=None, consi
     )
     logger.debug(f"Auto completion - Naive similarities calculation of similar services {time.time() - start_time}")
 
+    field_config = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["RESOURCE_TYPES"][resource_type]["ENUMERATED_FIELDS"]
+
     similar_services_per_field = {}
     for field in fields:
-        if similarity_threshold is None:
-            similarity_threshold = \
-                APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["ENUMERATED_FIELDS"][field]["SIMILARITY_THRESHOLD"]
+        st = similarity_threshold if similarity_threshold is not None else field_config[field]["SIMILARITY_THRESHOLD"]
+        cst = considered_services_threshold if considered_services_threshold is not None \
+            else field_config[field]["CONSIDERED_SERVICES_THRESHOLD"]
 
-        if considered_services_threshold is None:
-            considered_services_threshold = \
-                APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["ENUMERATED_FIELDS"][field]["CONSIDERED_SERVICES_THRESHOLD"]
-
-        # Get the most similar services
         most_similar = similarity_with_services_df\
             .sort_values(by='similarity', ascending=False)\
-            .head(considered_services_threshold)
+            .head(cst)
 
-        # Filter based on similarity threshold
-        most_similar = most_similar[most_similar["similarity"] >= similarity_threshold]
+        most_similar = most_similar[most_similar["similarity"] >= st]
 
-        # Store the ids of the most similar services
         similar_services_per_field[field] = list(most_similar.index.to_list())
 
     return similar_services_per_field
 
 
-def get_similar_services(fields, text_embedding, similarity_threshold=None, considered_services_threshold=None):
+def get_similar_services(fields, text_embedding, resource_type="service",
+                         similarity_threshold=None, considered_services_threshold=None):
     """
-    @param text_embedding: list, the text embedding of the current service
-    @return: list, the similar services ids
+    @param text_embedding: list, the text embedding of the current resource
+    @param resource_type: str, the type of resource being autocompleted
+    @return: dict mapping each field to a list of similar resource ids
     """
 
-    existing_text_embeddings = get_text_embeddings()
+    existing_text_embeddings = get_text_embeddings(resource_type)
 
-    # Find the most similar with the current embedding
-    similar_services = naive_search(fields, existing_text_embeddings, text_embedding, similarity_threshold,
-                                    considered_services_threshold)
+    similar_services = naive_search(fields, existing_text_embeddings, text_embedding, resource_type,
+                                    similarity_threshold, considered_services_threshold)
 
     return similar_services

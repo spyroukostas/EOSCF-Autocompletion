@@ -84,8 +84,14 @@ def mode_setting_validation():
 
 
 def empty_text_attributes_validation():
-    if APP_SETTINGS['BACKEND']['MODE'] == 'PROVIDERS-RECOMMENDER' \
-            and len(APP_SETTINGS['BACKEND']['SIMILAR_SERVICES']['TEXT_ATTRIBUTES']) == 0:
+    if APP_SETTINGS['BACKEND']['MODE'] == 'PROVIDERS-RECOMMENDER':
+        resource_types = APP_SETTINGS['BACKEND'].get('AUTO_COMPLETION', {}).get('RESOURCE_TYPES', {})
+        for rtype, rconfig in resource_types.items():
+            if len(rconfig.get('TEXT_ATTRIBUTES', [])) == 0:
+                raise NoTextAttributes(
+                    f"FATAL: resource type '{rtype}' has empty TEXT_ATTRIBUTES in AUTO_COMPLETION config.")
+    elif APP_SETTINGS['BACKEND']['MODE'] in ('PORTAL-RECOMMENDER', 'SIMILAR_SERVICES_EVALUATION') \
+            and len(APP_SETTINGS['BACKEND']['SIMILAR_SERVICES'].get('TEXT_ATTRIBUTES', [])) == 0:
         raise NoTextAttributes(f"FATAL: Mode {APP_SETTINGS['BACKEND']['MODE']} cannot run with empty "
                                f"text attributes in the config.")
 

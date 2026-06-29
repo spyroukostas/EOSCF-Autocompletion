@@ -24,10 +24,11 @@ def evaluate_one(gold_values, suggestions):
 
 def evaluation(similarity_threshold=None, considered_services_threshold=None,
                frequency_threshold=None, maximum_suggestions=5):
-    fields = ["categories", "scientific_domains", "target_users"]
+    fields = ["categories", "scientific_domains"]
 
+    text_attributes = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["RESOURCE_TYPES"]["service"]["TEXT_ATTRIBUTES"]
     db = get_registry()
-    services = db.get_services(attributes=APP_SETTINGS["BACKEND"]["SIMILAR_SERVICES"]["TEXT_ATTRIBUTES"] + fields)
+    services = db.get_services(attributes=text_attributes + fields)
 
     # Initialize evaluation results structure
     evaluation_results = {field: {"precision": [], "recall": [], "f1_score": []} for field in fields}

@@ -30,39 +30,33 @@ def filter_service_providers(tags, sim_threshold):
     return tags
 
 
-def filtering(candidate_tags, existing_values=None):
+def filtering(candidate_tags, existing_values=None, resource_type="service"):
     """
     Filters the tags candidates list
     Args:
         candidate_tags: DataFrame[columns={text, score}], a dataframe with tags and their score
         existing_values: list[str], a list with the existing tags
+        resource_type: str, used to determine which enumerated fields to filter against
 
     Returns: DataFrame[columns={text, score}]
 
     """
-    # Filter tags with zero score
     candidate_tags = candidate_tags[candidate_tags["score"] > 0]
 
-    # Filter the existing tags
     if existing_values is not None:
         candidate_tags = candidate_tags[~candidate_tags['text'].isin(existing_values)]
 
-    # Filter tags with more than <max_words>
     max_words = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["TAGS"]["MAX_WORDS"]
 
     if len(candidate_tags) > 0:
         candidate_tags = candidate_tags[candidate_tags['text'].str.split().apply(len) <= max_words]
 
-    # Filter tags similar with a category, a scientific domain or a target_user
-    # The filtered fields will be returned so that they can be injected on the other field suggestion (i.e. categories)
     sim_threshold = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["TAGS"]["PHRASES_SIM_THRESHOLD"]
     candidate_tags, filtered_enumerated_fields = \
-        enumerated_fields_filtering(candidate_tags, sim_threshold=sim_threshold)
+        enumerated_fields_filtering(candidate_tags, resource_type=resource_type, sim_threshold=sim_threshold)
 
-    # Filter tags based on manually curated rules
     candidate_tags = filter_based_on_manual_rules(candidate_tags)
 
-    # Deduplicate the existing tags
     candidate_tags = tags_deduplication(candidate_tags)
 
     return candidate_tags, filtered_enumerated_fields

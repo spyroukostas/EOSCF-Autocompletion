@@ -43,7 +43,6 @@ class CatalogueAPI(Registry):
 
         service["categories"] = subcategories
         service["scientific_domains"] = scientific_subdomains
-        service["target_users"] = service.pop("targetUsers")
 
         return service
 
@@ -154,12 +153,13 @@ class CatalogueAPI(Registry):
         else:
             raise IdNotExists(f"Category id {category_id} does not exist!")
 
-    def get_target_users(self):
-        return [item["id"] for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/TARGET_USER")]
+    def get_vocabulary(self, vocabulary_type: str) -> list:
+        return [item["id"] for item in
+                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")]
 
-    def get_target_users_id_and_name(self):
-        return [(item["id"], item["name"])
-                for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/TARGET_USER")]
+    def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
+        return [(item["id"], item["name"]) for item in
+                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")]
 
     def get_providers_names(self):
         # TODO currently we have hardcoded 8000 as maximum quantity
@@ -168,7 +168,7 @@ class CatalogueAPI(Registry):
                                   f"all?quantity=8000")["results"]]
 
     def _remove_general_attributes_from_services(self, services):
-        attributes = ['scientific_domains', 'categories', 'target_users']
+        attributes = ['scientific_domains', 'categories']
 
         def remove_fields_containing_other(attribute_values):
             return [attr for attr in attribute_values if '-other' not in attr]
@@ -178,11 +178,115 @@ class CatalogueAPI(Registry):
                 services[attribute] = services[attribute].apply(remove_fields_containing_other)
 
     def _remove_general_attributes_from_single_service(self, service):
-        attributes = ['scientific_domains', 'categories', 'target_users']
+        attributes = ['scientific_domains', 'categories']
 
         for attribute in attributes:
             if attribute in service:
                 service[attribute] = [attr for attr in service[attribute] if '-other' not in attr]
+
+    RESOURCE_TYPE_ENDPOINTS = {
+        "service": "/service/all",
+        "training_resource": "/trainingResource/all",
+        "datasource": "/datasource/all",
+        "organisation": "/public/provider/all",
+        "adapter": "/adapter/all",
+        "interoperability_record": "/interoperabilityRecord/all",
+        "deployable_application": "/deployableApplication/all",
+    }
+
+    RESOURCE_BY_ID_ENDPOINTS = {
+        "service": "/resource/{id}",
+        "training_resource": "/trainingResource/{id}",
+        "datasource": "/datasource/{id}",
+        "organisation": "/public/provider/{id}",
+        "adapter": "/adapter/{id}",
+        "interoperability_record": "/interoperabilityRecord/{id}",
+        "deployable_application": "/deployableApplication/{id}",
+    }
+
+    def _reformat_resource(self, resource: dict, resource_type: str) -> dict:
+        if resource_type == "service":
+            return self._reformat_service(resource)
+
+        r = dict(resource)
+
+        if resource_type == "training_resource":
+            r["target_groups"] = r.pop("targetGroups", []) or []
+            r["expertise_level"] = [r.pop("expertiseLevel")] if r.get("expertiseLevel") else []
+            r["learning_resource_types"] = r.pop("learningResourceTypes", []) or []
+            r["content_resource_types"] = r.pop("contentResourceTypes", []) or []
+            r["qualifications"] = r.pop("qualifications", []) or []
+            r["access_rights"] = [r.pop("accessRights")] if r.get("accessRights") else []
+
+        elif resource_type == "datasource":
+            if "scientificDomains" in r:
+                subdomains, subcategories = self._get_leaves_of_metadata_hierarchies(
+                    r.pop("scientificDomains", []), r.pop("categories", []))
+                r["scientific_domains"] = subdomains
+                r["categories"] = subcategories
+            r["datasource_classification"] = [r.pop("datasourceClassification")] if r.get("datasourceClassification") else []
+            r["research_product_types"] = r.pop("researchProductTypes", []) or []
+            r["jurisdiction"] = [r.pop("jurisdiction")] if r.get("jurisdiction") else []
+            r["trl"] = [r.pop("trl")] if r.get("trl") else []
+            r["order_type"] = [r.pop("orderType")] if r.get("orderType") else []
+
+        elif resource_type == "organisation":
+            r["country"] = [r.pop("country")] if r.get("country") else []
+            r["legal_status"] = [r.pop("legalStatus")] if r.get("legalStatus") else []
+
+        elif resource_type == "adapter":
+            r["programming_language"] = [r.pop("programmingLanguage")] if r.get("programmingLanguage") else []
+            r["package"] = r.pop("package", []) or []
+
+        elif resource_type == "deployable_application":
+            if "scientificDomains" in r:
+                subdomains = [item["scientificSubdomain"] for item in r.pop("scientificDomains", [])]
+                r["scientific_domains"] = subdomains
+
+        return r
+
+    def get_resources_of_type(self, resource_type: str, attributes: list):
+        endpoint = self.RESOURCE_TYPE_ENDPOINTS[resource_type]
+        response = self._get_request(f"{self.catalogue_base_url}{endpoint}?quantity=8000")
+
+        try:
+            resources = [self._reformat_resource(r, resource_type) for r in response["results"]]
+        except KeyError as e:
+            raise APIResponseFormatException(f"{e} does not exist in the response's fields")
+
+        if len(resources):
+            df = pd.DataFrame(resources)
+            df.rename(columns={"id": "service_id"}, inplace=True)
+            df = df[list(set(["service_id"] + attributes))]
+        else:
+            df = pd.DataFrame(columns=list(set(["service_id"] + attributes)))
+
+        return df
+
+    def get_resources_by_ids(self, resource_type: str, ids: list, attributes: list = None,
+                             remove_generic_attributes: bool = False):
+        if attributes is None:
+            attributes = []
+
+        endpoint_template = self.RESOURCE_BY_ID_ENDPOINTS[resource_type]
+        resources = []
+        for rid in ids:
+            r = self._get_request(f"{self.catalogue_base_url}{endpoint_template.format(id=rid)}")
+            if r is None:
+                raise IdNotExists(f"Resource id {rid} does not exist!")
+            resources.append(self._reformat_resource(r, resource_type))
+
+        if len(resources):
+            df = pd.DataFrame(resources)
+            df.rename(columns={"id": "service_id"}, inplace=True)
+            df = df[["service_id"] + attributes]
+        else:
+            df = pd.DataFrame(columns=["service_id"] + attributes)
+
+        if remove_generic_attributes:
+            self._remove_general_attributes_from_services(df)
+
+        return df
 
     def is_valid_service(self, service_id):
         return self.get_service(service_id) is not None

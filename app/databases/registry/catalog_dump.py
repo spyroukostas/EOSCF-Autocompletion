@@ -42,7 +42,6 @@ class CatalogueDump(Registry):
 
         service["categories"] = subcategories
         service["scientific_domains"] = scientific_subdomains
-        service["target_users"] = service.pop("targetUsers")
 
         return service
 
@@ -118,19 +117,29 @@ class CatalogueDump(Registry):
         else:
             raise IdNotExists(f"Category id {category_id} does not exist!")
 
-    def get_target_users_id_and_name(self):
-        return [(domain["id"], domain["name"])
-                for domain in self.mongo_connector.get_db()["target_user"].find({}, {"id": 1})]
+    def get_vocabulary(self, vocabulary_type: str) -> list:
+        return [item["id"] for item in
+                _get_request(f"https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/{vocabulary_type}")]
 
-    def get_target_users_names(self):
-        return [domain["name"] for domain in self.mongo_connector.get_db()["target_users"].find({}, {"name": 1})]
+    def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
+        return [(item["id"], item["name"]) for item in
+                _get_request(f"https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/{vocabulary_type}")]
+
+    def get_resources_of_type(self, resource_type: str, attributes: list):
+        raise RegistryMethodNotImplemented(
+            f"get_resources_of_type is not implemented in CatalogueDump")
+
+    def get_resources_by_ids(self, resource_type: str, ids: list, attributes: list = None,
+                             remove_generic_attributes: bool = False):
+        raise RegistryMethodNotImplemented(
+            f"get_resources_by_ids is not implemented in CatalogueDump")
 
     def get_providers_names(self):
         return [provider["name"] for provider in self.mongo_connector.get_db()["provider"].find(
             {}, {"name": 1})]
 
     def _remove_general_attributes_from_services(self, services):
-        attributes = ['scientific_domains', 'categories', 'target_users']
+        attributes = ['scientific_domains', 'categories']
 
         def remove_fields_containing_other(attribute_values):
             return [attr for attr in attribute_values if '-other-other' not in attr and 'generic' not in attr]
@@ -140,7 +149,7 @@ class CatalogueDump(Registry):
                 services[attribute] = services[attribute].apply(remove_fields_containing_other)
 
     def _remove_general_attributes_from_single_service(self, service):
-        attributes = ['scientific_domains', 'categories', 'target_users']
+        attributes = ['scientific_domains', 'categories']
 
         for attribute in attributes:
             if attribute in service:
@@ -203,11 +212,6 @@ def _populate_catalog_db(db):
     scientific_domain_collection = db["scientific_domain"]
     # Populate scientific domain collection
     scientific_domain_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/SCIENTIFIC_SUBDOMAIN"))
-
-    # Create a collection of target_users
-    target_users_collection = db["target_user"]
-    # Populate the target users collection
-    target_users_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/TARGET_USER"))
 
     # Create a collection of providers
     providers_collection = db["provider"]

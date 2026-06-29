@@ -30,7 +30,7 @@ class RSMongoDB(Registry):
 
     def check_health(self) -> Optional[str]:
         # Check that all the required collections exist in the RS Mongo
-        collections = ['service', 'project', 'scientific_domain', 'category', 'target_user', 'user']
+        collections = ['service', 'project', 'scientific_domain', 'category', 'user']
 
         try:
             collection_list = self.mongo_connector.get_db().list_collection_names()
@@ -120,12 +120,37 @@ class RSMongoDB(Registry):
         else:
             raise IdNotExists(f"Category id {category_id} does not exist!")
 
-    def get_target_users(self):
-        return [domain["_id"] for domain in self.mongo_connector.get_db()["target_user"].find({}, {"_id": 1})]
+    def get_vocabulary(self, vocabulary_type: str) -> list:
+        collection_map = {
+            "SUBCATEGORY": ("category", "_id"),
+            "SCIENTIFIC_SUBDOMAIN": ("scientific_domain", "_id"),
+        }
+        if vocabulary_type not in collection_map:
+            raise RegistryMethodNotImplemented(
+                f"get_vocabulary for type '{vocabulary_type}' is not implemented in RSMongoDB")
+        collection, id_field = collection_map[vocabulary_type]
+        return [doc[id_field] for doc in self.mongo_connector.get_db()[collection].find({}, {id_field: 1})]
 
-    def get_target_users_id_and_name(self):
-        return [(domain["_id"], domain["name"])
-                for domain in self.mongo_connector.get_db()["target_user"].find({}, {"name": 1})]
+    def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
+        collection_map = {
+            "SUBCATEGORY": "category",
+            "SCIENTIFIC_SUBDOMAIN": "scientific_domain",
+        }
+        if vocabulary_type not in collection_map:
+            raise RegistryMethodNotImplemented(
+                f"get_vocabulary_with_names for type '{vocabulary_type}' is not implemented in RSMongoDB")
+        collection = collection_map[vocabulary_type]
+        return [(doc["_id"], doc["name"])
+                for doc in self.mongo_connector.get_db()[collection].find({}, {"name": 1})]
+
+    def get_resources_of_type(self, resource_type: str, attributes: list):
+        raise RegistryMethodNotImplemented(
+            f"get_resources_of_type is not implemented in RSMongoDB")
+
+    def get_resources_by_ids(self, resource_type: str, ids: list, attributes: list = None,
+                             remove_generic_attributes: bool = False):
+        raise RegistryMethodNotImplemented(
+            f"get_resources_by_ids is not implemented in RSMongoDB")
 
     def get_providers_names(self):
         return [provider["name"] for provider in self.mongo_connector.get_db()["provider"].find(
@@ -141,10 +166,6 @@ class RSMongoDB(Registry):
                 category["_id"]
                 for category in self.mongo_connector.get_db()["category"].find({"name": "Other"}, {"_id": 1})
             },
-            "target_users": {
-                target_user["_id"]
-                for target_user in self.mongo_connector.get_db()["target_user"].find({"name": "Other"}, {"_id": 1})
-            }
         }
 
     def _remove_general_attributes_from_services(self, services):

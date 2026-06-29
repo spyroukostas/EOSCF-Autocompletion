@@ -26,6 +26,10 @@
 
 [Configuration]({% link configuration.md %})
 
+## Resource Types
+
+[Resource Types]({% link resource-types.md %})
+
 ## Monitoring and Logging
 
 [Monitoring and Logging]({% link monitoring-logging.md %})

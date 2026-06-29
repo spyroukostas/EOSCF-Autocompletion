@@ -15,6 +15,8 @@ router = APIRouter(prefix='/v1')
 
 
 class Request(BaseModel):
+    resource_type: str = "service"
+
     new_service: dict
 
     # Fields to suggest options
@@ -28,6 +30,7 @@ class Request(BaseModel):
     class Config:
         schema_extra = {
             "example": {
+                "resource_type": "service",
                 "new_service": {
                     "description": "The Social Sciences and Humanities Open Marketplace, built as part of the Social "
                                    "Sciences and Humanities Open Cloud project (SSHOC), is a discovery portal which "
@@ -79,7 +82,8 @@ def auto_completion_suggestions(request: Request):
             for field, suggestions in get_auto_completion_suggestions(
                 request.new_service, request.fields_to_suggest,
                 request.maximum_suggestions,
-                request.existing_fields_values).items()
+                request.existing_fields_values,
+                resource_type=request.resource_type).items()
         ]
     except (MissingStructure, MissingAttribute) as e:
         logger.error((str(e)))

@@ -14,7 +14,8 @@ SCHEDULING:
 CREDENTIALS: "credentials.yml"
 
 CATALOGUE_API:
-  BASE_URL: "https://api.providers.sandbox.eosc-beyond.eu"
+  BASE_URL: "https://federatedsearch.service.eosc-beyond.eu/federation"
+  VOCABULARY_BASE_URL: "https://api.providers.sandbox.eosc-beyond.eu"
 
 SPACY_MODEL: "en_core_web_sm"
 

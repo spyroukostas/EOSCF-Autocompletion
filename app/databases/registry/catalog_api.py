@@ -16,10 +16,11 @@ class CatalogueAPI(Registry):
     def __init__(self):
         super().__init__()
         self.catalogue_base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["BASE_URL"]
+        self.vocabulary_base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["VOCABULARY_BASE_URL"]
 
     def check_health(self) -> Optional[str]:
         try:
-            self._get_request(f"{self.catalogue_base_url}/vocabulary/byType")
+            self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType")
         except APIResponseError as e:
             return "Cannot connect with catalogue API"
         return None
@@ -61,7 +62,7 @@ class CatalogueAPI(Registry):
     def get_services_by_ids(self, ids, attributes=None, remove_generic_attributes=False):
         services = []
         for service_id in ids:
-            service = self._get_request(f"{self.catalogue_base_url}/service/{quote(service_id, safe='')}")
+            service = self._get_request(f"{self.catalogue_base_url}/services/{quote(service_id, safe='')}")
             if service is None:
                 raise IdNotExists(f"Service id {service_id} does not exist!")
             services.append(self._reformat_service(service))
@@ -88,13 +89,13 @@ class CatalogueAPI(Registry):
             attributes = []
 
         # TODO currently we have hardcoded 8000 as maximum quantity
-        response = self._get_request(f"{self.catalogue_base_url}/service/all?quantity=8000")
+        response = self._get_request(f"{self.catalogue_base_url}/services?quantity=8000")
 
         try:
             if reformat:
-                services = [self._reformat_service(service) for service in response["results"]]
+                services = [self._reformat_service(item["result"]) for item in response["results"]]
             else:
-                services = response["results"]
+                services = [item["result"] for item in response["results"]]
         except KeyError as e:
             raise APIResponseFormatException(f"{e} does not exist in the response's fields")
 
@@ -111,7 +112,7 @@ class CatalogueAPI(Registry):
         return services_df
 
     def get_service(self, service_id, reformat=True, remove_generic_attributes=True):
-        service = self._get_request(f"{self.catalogue_base_url}/service/{quote(service_id, safe='')}")
+        service = self._get_request(f"{self.catalogue_base_url}/services/{quote(service_id, safe='')}")
 
         if service is None:
             raise IdNotExists(f"Service id {service_id} does not exist!")
@@ -125,37 +126,37 @@ class CatalogueAPI(Registry):
 
     def get_scientific_domains(self):
         return [item["id"] for item in
-                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SCIENTIFIC_SUBDOMAIN")]
+                self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/SCIENTIFIC_SUBDOMAIN")]
 
     def get_scientific_subdomains_id_and_name(self):
         return [(item["id"], item["name"]) for item in
-                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SCIENTIFIC_SUBDOMAIN")]
+                self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/SCIENTIFIC_SUBDOMAIN")]
 
     def get_scientific_upper_domains_id_and_name(self):
         return [(item["id"], item["name"]) for item in
-                self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SCIENTIFIC_DOMAIN")]
+                self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/SCIENTIFIC_DOMAIN")]
 
     def get_specific_scientific_domain_name(self, scientific_domain_id):
-        res = self._get_request(f"{self.catalogue_base_url}/vocabulary/{scientific_domain_id}")
+        res = self._get_request(f"{self.vocabulary_base_url}/vocabulary/{scientific_domain_id}")
         if res is not None:
             return res["name"]
         else:
             raise IdNotExists(f"Scientific domain id {scientific_domain_id} does not exist!")
 
     def get_categories(self):
-        return [item["id"] for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SUBCATEGORY")]
+        return [item["id"] for item in self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/SUBCATEGORY")]
 
     def get_subcategories_id_and_name(self):
         return [(item["id"], item["name"])
-                for item in self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/SUBCATEGORY")]
+                for item in self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/SUBCATEGORY")]
 
     def get_upper_categories_id_and_name(self):
         return [(item["id"], item["name"])
                 for item in (self._get_request(
-                    f"{self.catalogue_base_url}/vocabulary/byType/CATEGORY") or [])]
+                    f"{self.vocabulary_base_url}/vocabulary/byType/CATEGORY") or [])]
 
     def get_specific_category_name(self, category_id):
-        res = self._get_request(f"{self.catalogue_base_url}/vocabulary/{category_id}")
+        res = self._get_request(f"{self.vocabulary_base_url}/vocabulary/{category_id}")
         if res is not None:
             return res["name"]
         else:
@@ -163,7 +164,7 @@ class CatalogueAPI(Registry):
 
     def get_vocabulary(self, vocabulary_type: str) -> list:
         try:
-            response = self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")
+            response = self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/{vocabulary_type}")
         except APIResponseError:
             logger.warning(f"Could not fetch vocabulary '{vocabulary_type}' from API.")
             return []
@@ -171,7 +172,7 @@ class CatalogueAPI(Registry):
 
     def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
         try:
-            response = self._get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")
+            response = self._get_request(f"{self.vocabulary_base_url}/vocabulary/byType/{vocabulary_type}")
         except APIResponseError:
             logger.warning(f"Could not fetch vocabulary '{vocabulary_type}' from API.")
             return []
@@ -179,9 +180,8 @@ class CatalogueAPI(Registry):
 
     def get_providers_names(self):
         # TODO currently we have hardcoded 8000 as maximum quantity
-        return [item["name"] for item in
-                self._get_request(f"{self.catalogue_base_url}/public/provider/"
-                                  f"all?quantity=8000")["results"]]
+        return [item["result"]["name"] for item in
+                self._get_request(f"{self.catalogue_base_url}/organisations?quantity=8000")["results"]]
 
     def _remove_general_attributes_from_services(self, services):
         attributes = ['scientific_domains', 'categories']
@@ -242,10 +242,10 @@ class CatalogueAPI(Registry):
 
     def get_resources_of_type(self, resource_type: str, attributes: list):
         camel = self._to_camel_case(resource_type)
-        response = self._get_request(f"{self.catalogue_base_url}/{camel}/all?quantity=8000")
+        response = self._get_request(f"{self.catalogue_base_url}/{camel}s?quantity=8000")
 
         try:
-            resources = [self._reformat_resource(r, resource_type) for r in response["results"]]
+            resources = [self._reformat_resource(item["result"], resource_type) for item in response["results"]]
         except KeyError as e:
             raise APIResponseFormatException(f"{e} does not exist in the response's fields")
 
@@ -267,7 +267,7 @@ class CatalogueAPI(Registry):
         camel = self._to_camel_case(resource_type)
         resources = []
         for rid in ids:
-            r = self._get_request(f"{self.catalogue_base_url}/{camel}/{quote(rid, safe='')}")
+            r = self._get_request(f"{self.catalogue_base_url}/{camel}s/{quote(rid, safe='')}")
             if r is None:
                 raise IdNotExists(f"Resource id {rid} does not exist!")
             resources.append(self._reformat_resource(r, resource_type))

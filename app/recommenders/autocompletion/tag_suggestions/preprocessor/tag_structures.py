@@ -126,10 +126,13 @@ class TagStructuresManager:
 
         # Create nn structure for efficient search based on embeddings
         embeddings = tags[tags["embedding"].notnull()]["embedding"]
-        nbrs = NearestNeighbors(n_neighbors=5, algorithm='ball_tree', metric='euclidean')\
-            .fit(embeddings.values.tolist())
-
-        store_object(nbrs, "TAGS_NN")
+        if embeddings.empty:
+            logger.warning("No tag embeddings available; skipping nearest-neighbor structure.")
+            store_object(None, "TAGS_NN")
+        else:
+            nbrs = NearestNeighbors(n_neighbors=min(5, len(embeddings)), algorithm='ball_tree', metric='euclidean')\
+                .fit(embeddings.values.tolist())
+            store_object(nbrs, "TAGS_NN")
 
     def get_tag_structure(self):
         if not self.existence_tag_structures():
@@ -151,6 +154,9 @@ class TagStructuresManager:
         """
 
         tags_nn = self.get_tag_nn_structure()
+
+        if tags_nn is None:
+            return pd.DataFrame()
 
         distances, indices = tags_nn.kneighbors([value])
 

@@ -21,7 +21,7 @@ def get_tags_with_score(text_of_service):
 def get_textrank_scores_of_all_services():
     print("Requesting all services...", end='')
     base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["BASE_URL"]
-    services = requests.get(f"{base_url}/service/all?quantity=1000").json()["results"]
+    services = requests.get(f"{base_url}/services?quantity=1000").json()["results"]
     print("Done")
 
     textrank_scores = []

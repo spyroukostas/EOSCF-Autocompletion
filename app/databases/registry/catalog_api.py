@@ -52,6 +52,9 @@ class CatalogueAPI(Registry):
 
     def _reformat_service(self, service):
         self._normalize_domain_category_fields(service)
+        service["access_types"] = service.pop("accessTypes", []) or []
+        service["order_type"] = [service.pop("orderType")] if service.get("orderType") else []
+        service["trl"] = [service.pop("trl")] if service.get("trl") else []
         return service
 
     # TODO change to one call
@@ -269,12 +272,13 @@ class CatalogueAPI(Registry):
                 raise IdNotExists(f"Resource id {rid} does not exist!")
             resources.append(self._reformat_resource(r, resource_type))
 
+        cols = list(set(["service_id"] + attributes))
         if len(resources):
             df = pd.DataFrame(resources)
             df.rename(columns={"id": "service_id"}, inplace=True)
-            df = df[["service_id"] + attributes]
+            df = df.reindex(columns=cols, fill_value="")
         else:
-            df = pd.DataFrame(columns=["service_id"] + attributes)
+            df = pd.DataFrame(columns=cols)
 
         if remove_generic_attributes:
             self._remove_general_attributes_from_services(df)

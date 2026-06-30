@@ -9,7 +9,9 @@ router = APIRouter(prefix='/v1')
 
 
 class Request(BaseModel):
-    service: dict
+    resource_type: str = "service"
+
+    resource: dict
 
     maximum_suggestions: int
 
@@ -18,7 +20,8 @@ class Request(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "service": {
+                "resource_type": "service",
+                "resource": {
                     "description": "The Social Sciences and Humanities Open Marketplace, built as part of the Social "
                                    "Sciences and Humanities Open Cloud project (SSHOC), is a discovery portal which "
                                    "pools and contextualises resources for Social Sciences and Humanities research "
@@ -39,7 +42,8 @@ class Request(BaseModel):
     tags=["tags auto-completion"]
 )
 def tags_recommendations(request: Request):
-    tags, _ = get_suggestions_for_tags(service_attributes=request.service,
+    tags, _ = get_suggestions_for_tags(service_attributes=request.resource,
                                        existing_values=request.existing_values,
-                                       max_num=request.maximum_suggestions)
+                                       max_num=request.maximum_suggestions,
+                                       resource_type=request.resource_type)
     return tags

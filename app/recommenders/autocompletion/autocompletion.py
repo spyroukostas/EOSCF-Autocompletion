@@ -30,6 +30,10 @@ def inject_extracted_enumerated_fields(suggestions, extracted_enumerated_fields)
 
 def get_auto_completion_suggestions(new_service, fields_to_suggest, maximum_suggestions,
                                     existing_fields_values, resource_type="service"):
+    if not fields_to_suggest:
+        enum_keys = APP_SETTINGS["BACKEND"]["AUTO_COMPLETION"]["RESOURCE_TYPES"][resource_type]["ENUMERATED_FIELDS"].keys()
+        fields_to_suggest = list(enum_keys) + ["tags"]
+
     requested_enumerated_fields = _get_enumerated_fields(fields_to_suggest, resource_type)
 
     suggestions = get_suggestions_for_enumerated_fields(

@@ -20,7 +20,7 @@ class Request(BaseModel):
     resource: dict
 
     # Fields to suggest options
-    fields_to_suggest: List[str]
+    fields_to_suggest: List[str] = []
 
     # The maximum suggestions per field
     maximum_suggestions: int

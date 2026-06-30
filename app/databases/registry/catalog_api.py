@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from urllib.parse import quote
 
 import pandas as pd
 import requests
@@ -56,7 +57,7 @@ class CatalogueAPI(Registry):
     def get_services_by_ids(self, ids, attributes=None, remove_generic_attributes=False):
         services = []
         for service_id in ids:
-            service = self._get_request(f"{self.catalogue_base_url}/resource/{service_id}")
+            service = self._get_request(f"{self.catalogue_base_url}/service/{quote(service_id, safe='')}")
             if service is None:
                 raise IdNotExists(f"Service id {service_id} does not exist!")
             services.append(self._reformat_service(service))
@@ -106,7 +107,7 @@ class CatalogueAPI(Registry):
         return services_df
 
     def get_service(self, service_id, reformat=True, remove_generic_attributes=True):
-        service = self._get_request(f"{self.catalogue_base_url}/resource/{service_id}")
+        service = self._get_request(f"{self.catalogue_base_url}/service/{quote(service_id, safe='')}")
 
         if service is None:
             raise IdNotExists(f"Service id {service_id} does not exist!")
@@ -195,25 +196,10 @@ class CatalogueAPI(Registry):
             if attribute in service:
                 service[attribute] = [attr for attr in service[attribute] if '-other' not in attr]
 
-    RESOURCE_TYPE_ENDPOINTS = {
-        "service": "/service/all",
-        "training_resource": "/trainingResource/all",
-        "datasource": "/datasource/all",
-        "organisation": "/public/provider/all",
-        "adapter": "/adapter/all",
-        "interoperability_record": "/interoperabilityRecord/all",
-        "deployable_application": "/deployableApplication/all",
-    }
-
-    RESOURCE_BY_ID_ENDPOINTS = {
-        "service": "/resource/{id}",
-        "training_resource": "/trainingResource/{id}",
-        "datasource": "/datasource/{id}",
-        "organisation": "/public/provider/{id}",
-        "adapter": "/adapter/{id}",
-        "interoperability_record": "/interoperabilityRecord/{id}",
-        "deployable_application": "/deployableApplication/{id}",
-    }
+    @staticmethod
+    def _to_camel_case(snake_str: str) -> str:
+        parts = snake_str.split('_')
+        return parts[0] + ''.join(word.capitalize() for word in parts[1:])
 
     def _reformat_resource(self, resource: dict, resource_type: str) -> dict:
         if resource_type == "service":
@@ -251,8 +237,8 @@ class CatalogueAPI(Registry):
         return r
 
     def get_resources_of_type(self, resource_type: str, attributes: list):
-        endpoint = self.RESOURCE_TYPE_ENDPOINTS[resource_type]
-        response = self._get_request(f"{self.catalogue_base_url}{endpoint}?quantity=8000")
+        camel = self._to_camel_case(resource_type)
+        response = self._get_request(f"{self.catalogue_base_url}/{camel}/all?quantity=8000")
 
         try:
             resources = [self._reformat_resource(r, resource_type) for r in response["results"]]
@@ -274,10 +260,10 @@ class CatalogueAPI(Registry):
         if attributes is None:
             attributes = []
 
-        endpoint_template = self.RESOURCE_BY_ID_ENDPOINTS[resource_type]
+        camel = self._to_camel_case(resource_type)
         resources = []
         for rid in ids:
-            r = self._get_request(f"{self.catalogue_base_url}{endpoint_template.format(id=rid)}")
+            r = self._get_request(f"{self.catalogue_base_url}/{camel}/{quote(rid, safe='')}")
             if r is None:
                 raise IdNotExists(f"Resource id {rid} does not exist!")
             resources.append(self._reformat_resource(r, resource_type))

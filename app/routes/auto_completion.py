@@ -17,7 +17,7 @@ router = APIRouter(prefix='/v1')
 class Request(BaseModel):
     resource_type: str = "service"
 
-    new_service: dict
+    resource: dict
 
     # Fields to suggest options
     fields_to_suggest: List[str]
@@ -31,7 +31,7 @@ class Request(BaseModel):
         schema_extra = {
             "example": {
                 "resource_type": "service",
-                "new_service": {
+                "resource": {
                     "description": "The Social Sciences and Humanities Open Marketplace, built as part of the Social "
                                    "Sciences and Humanities Open Cloud project (SSHOC), is a discovery portal which "
                                    "pools and contextualises resources for Social Sciences and Humanities research "
@@ -69,7 +69,7 @@ def auto_completion_suggestions(request: Request):
     Based on the new service's filled fields given as input, we recommend auto-complete suggestions for the requested
     fields.
 
-    - **new_service**: the filled fields of the new partial created service
+    - **resource**: the filled fields of the new partial created resource
     - **fields_to_suggest**: the fields for which suggestion will be generated
     - **maximum_suggestions**: the maximum number of suggestions per field
     - **existing_fields_values**: the existing values for each suggested field
@@ -80,7 +80,7 @@ def auto_completion_suggestions(request: Request):
         return [
             FieldSuggestions(field_name=field, suggestions=suggestions)
             for field, suggestions in get_auto_completion_suggestions(
-                request.new_service, request.fields_to_suggest,
+                request.resource, request.fields_to_suggest,
                 request.maximum_suggestions,
                 request.existing_fields_values,
                 resource_type=request.resource_type).items()

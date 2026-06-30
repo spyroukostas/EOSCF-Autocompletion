@@ -9,12 +9,13 @@ logger = logging.getLogger(__name__)
 from app.databases.registry.registry_abc import Registry
 from app.exceptions import (APIResponseError, APIResponseFormatException,
                             IdNotExists, RegistryMethodNotImplemented)
+from app.settings import APP_SETTINGS
 
 
 class CatalogueAPI(Registry):
     def __init__(self):
         super().__init__()
-        self.catalogue_base_url = "https://api.providers.sandbox.eosc-beyond.eu"
+        self.catalogue_base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["BASE_URL"]
 
     def check_health(self) -> Optional[str]:
         try:

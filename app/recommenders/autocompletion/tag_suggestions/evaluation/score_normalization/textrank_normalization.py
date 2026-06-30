@@ -7,6 +7,7 @@ from app.recommenders.autocompletion.tag_suggestions.components.filtering.filter
     filtering
 from app.recommenders.autocompletion.tag_suggestions.components.tag_candidates import \
     get_tag_candidates
+from app.settings import APP_SETTINGS
 from tqdm import tqdm
 
 
@@ -19,7 +20,8 @@ def get_tags_with_score(text_of_service):
 
 def get_textrank_scores_of_all_services():
     print("Requesting all services...", end='')
-    services = requests.get("https://api.providers.sandbox.eosc-beyond.eu/service/all?quantity=1000").json()["results"]
+    base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["BASE_URL"]
+    services = requests.get(f"{base_url}/service/all?quantity=1000").json()["results"]
     print("Done")
 
     textrank_scores = []

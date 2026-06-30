@@ -14,6 +14,9 @@ SCHEDULING:
 
 CREDENTIALS: "credentials.yml"
 
+CATALOGUE_API:
+  BASE_URL: "https://api.providers.sandbox.eosc-beyond.eu"
+
 SPACY_MODEL: "en_core_web_sm"
 
 SIMILAR_SERVICES:

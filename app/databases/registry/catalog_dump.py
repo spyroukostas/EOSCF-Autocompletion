@@ -18,6 +18,7 @@ class CatalogueDump(Registry):
 
     def __init__(self):
         super().__init__()
+        self.catalogue_base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["BASE_URL"]
         self.mongo_connector = MongoDbConnector(
             uri=form_mongo_url(
                 APP_SETTINGS["CREDENTIALS"]['RS_MONGO_USERNAME'],
@@ -119,11 +120,11 @@ class CatalogueDump(Registry):
 
     def get_vocabulary(self, vocabulary_type: str) -> list:
         return [item["id"] for item in
-                _get_request(f"https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/{vocabulary_type}")]
+                _get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")]
 
     def get_vocabulary_with_names(self, vocabulary_type: str) -> list:
         return [(item["id"], item["name"]) for item in
-                _get_request(f"https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/{vocabulary_type}")]
+                _get_request(f"{self.catalogue_base_url}/vocabulary/byType/{vocabulary_type}")]
 
     def get_resources_of_type(self, resource_type: str, attributes: list):
         raise RegistryMethodNotImplemented(
@@ -196,28 +197,28 @@ def _get_request(request):
     return response.json()
 
 
-def _populate_catalog_db(db):
+def _populate_catalog_db(db, base_url):
     # Create a collection of services
     services_collection = db["service"]
     # Populate services collection
     # TODO currently we have hardcoded 800 as maximum quantity
-    services_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/service/all?quantity=10000")["results"])
+    services_collection.insert_many(_get_request(f"{base_url}/service/all?quantity=10000")["results"])
 
     # Create a collection of categories
     category_collection = db["category"]
     # Populate the category collection
-    category_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/SUBCATEGORY"))
+    category_collection.insert_many(_get_request(f"{base_url}/vocabulary/byType/SUBCATEGORY"))
 
     # Create a collection of scientific domains
     scientific_domain_collection = db["scientific_domain"]
     # Populate scientific domain collection
-    scientific_domain_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/vocabulary/byType/SCIENTIFIC_SUBDOMAIN"))
+    scientific_domain_collection.insert_many(_get_request(f"{base_url}/vocabulary/byType/SCIENTIFIC_SUBDOMAIN"))
 
     # Create a collection of providers
     providers_collection = db["provider"]
     # Populate the target users collection
     # TODO currently we have hardcoded 400 as maximum quantity
-    providers_collection.insert_many(_get_request("https://api.providers.sandbox.eosc-beyond.eu/provider/all?quantity=10000")["results"])
+    providers_collection.insert_many(_get_request(f"{base_url}/organisation/all?quantity=10000")["results"])
 
 
 if __name__ == '__main__':
@@ -230,4 +231,5 @@ if __name__ == '__main__':
             ))
     db = conn["catalog_dump"]
     # Populate the database
-    _populate_catalog_db(db)
+    base_url = APP_SETTINGS["BACKEND"]["CATALOGUE_API"]["BASE_URL"]
+    _populate_catalog_db(db, base_url)

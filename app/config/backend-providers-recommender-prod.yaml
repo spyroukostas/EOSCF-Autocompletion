@@ -62,7 +62,7 @@ AUTO_COMPLETION:
           CONSIDERED_SERVICES_THRESHOLD: 5
           FREQUENCY_THRESHOLD: 0.1
     training_resource:
-      TEXT_ATTRIBUTES: ["title", "description"]
+      TEXT_ATTRIBUTES: ["name", "description"]
       ENUMERATED_FIELDS:
         target_groups:
           VOCABULARY_TYPE: "TARGET_USER"
@@ -148,6 +148,52 @@ AUTO_COMPLETION:
       ENUMERATED_FIELDS:
         scientific_domains:
           VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+    catalogue:
+      TEXT_ATTRIBUTES: ["name", "description", "scope"]
+      ENUMERATED_FIELDS:
+        scientific_domains:
+          VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        legal_status:
+          VOCABULARY_TYPE: "PROVIDER_LEGAL_STATUS"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        hosting_legal_entity:
+          VOCABULARY_TYPE: "PROVIDER_HOSTING_LEGAL_ENTITY"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        participating_countries:
+          VOCABULARY_TYPE: "COUNTRY"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        networks:
+          VOCABULARY_TYPE: "PROVIDER_NETWORK"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+    interoperability_record:
+      TEXT_ATTRIBUTES: ["name", "description"]
+      ENUMERATED_FIELDS:
+        status:
+          VOCABULARY_TYPE: "IR_STATUS"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        domain:
+          VOCABULARY_TYPE: "SCIENTIFIC_DOMAIN"
+          SIMILARITY_THRESHOLD: 0.5
+          CONSIDERED_SERVICES_THRESHOLD: 5
+          FREQUENCY_THRESHOLD: 0.1
+        eosc_guideline_type:
+          VOCABULARY_TYPE: "IR_EOSC_GUIDELINE_TYPE"
           SIMILARITY_THRESHOLD: 0.5
           CONSIDERED_SERVICES_THRESHOLD: 5
           FREQUENCY_THRESHOLD: 0.1

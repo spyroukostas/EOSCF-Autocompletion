@@ -21,13 +21,14 @@ The following resource types have a normalisation branch implemented in `Catalog
 
 | Resource type key | API endpoint | Notable enumerable fields |
 |---|---|---|
-| `service` | `/service/all` | `categories`, `scientific_domains`, `access_types`, `trl`, `jurisdiction`, `order_type` |
-| `training_resource` | `/trainingResource/all` | `target_groups`, `expertise_level`, `learning_resource_types`, `content_resource_types`, `qualifications`, `access_rights` |
-| `datasource` | `/datasource/all` | `scientific_domains`, `datasource_classification`, `jurisdiction`, `trl`, `order_type` |
-| `organisation` | `/public/provider/all` | `country`, `legal_status` |
-| `adapter` | `/adapter/all` | `programming_language` |
-| `interoperability_record` | `/interoperabilityRecord/all` | — |
-| `deployable_application` | `/deployableApplication/all` | `scientific_domains` |
+| `service` | `/services` | `categories`, `scientific_domains`, `access_types`, `trl`, `jurisdiction`, `order_type` |
+| `training_resource` | `/trainingResources` | `target_groups`, `expertise_level`, `learning_resource_types`, `content_resource_types`, `qualifications`, `access_rights` |
+| `datasource` | `/datasources` | `scientific_domains`, `datasource_classification`, `jurisdiction`, `trl`, `order_type` |
+| `organisation` | `/organisations` | `country`, `legal_status` |
+| `adapter` | `/adapters` | `programming_language` |
+| `interoperability_record` | `/interoperabilityRecords` | `status`, `domain`, `eosc_guideline_type` |
+| `deployable_application` | `/deployableApplications` | `scientific_domains` |
+| `catalogue` | `/catalogues` | `scientific_domains`, `legal_status`, `hosting_legal_entity`, `participating_countries`, `networks` |
 
 ---
 
@@ -53,6 +54,13 @@ Vocabulary values are resolved at runtime by calling the EOSC API endpoint `/voc
 | Datasource | `DS_JURISDICTION` | `jurisdiction` |
 | Organisation | `PROVIDER_LEGAL_STATUS` | `legal_status` |
 | DeployableApplication | `SCIENTIFIC_SUBDOMAIN` | `scientific_domains` |
+| InteroperabilityRecord | `IR_STATUS` | `status` |
+| InteroperabilityRecord | `SCIENTIFIC_DOMAIN` | `domain` |
+| InteroperabilityRecord | `IR_EOSC_GUIDELINE_TYPE` | `eosc_guideline_type` |
+| Catalogue | `SCIENTIFIC_SUBDOMAIN` | `scientific_domains` |
+| Catalogue | `PROVIDER_LEGAL_STATUS` | `legal_status` |
+| Catalogue | `PROVIDER_HOSTING_LEGAL_ENTITY` | `hosting_legal_entity` |
+| Catalogue | `PROVIDER_NETWORK` | `networks` |
 | Shared | `COUNTRY` | `country` |
 | Shared | `LANGUAGE` | `languages` |
 

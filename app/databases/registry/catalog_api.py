@@ -238,6 +238,18 @@ class CatalogueAPI(Registry):
         elif resource_type == "deployable_application":
             self._normalize_domain_category_fields(r)
 
+        elif resource_type == "catalogue":
+            self._normalize_domain_category_fields(r)
+            r["legal_status"] = [r.pop("legalStatus")] if r.get("legalStatus") else []
+            r["hosting_legal_entity"] = [r.pop("hostingLegalEntity")] if r.get("hostingLegalEntity") else []
+            r["participating_countries"] = r.pop("participatingCountries", []) or []
+            r["networks"] = r.pop("networks", []) or []
+
+        elif resource_type == "interoperability_record":
+            r["status"] = [r.pop("status")] if r.get("status") else []
+            r["domain"] = [r.pop("domain")] if r.get("domain") else []
+            r["eosc_guideline_type"] = [r.pop("eoscGuidelineType")] if r.get("eoscGuidelineType") else []
+
         return r
 
     def get_resources_of_type(self, resource_type: str, attributes: list):

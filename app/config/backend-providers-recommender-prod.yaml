@@ -157,7 +157,7 @@ AUTO_COMPLETION:
           CONSIDERED_SERVICES_THRESHOLD: 5
           FREQUENCY_THRESHOLD: 0.1
     catalogue:
-      TEXT_ATTRIBUTES: ["name", "description", "scope"]
+      TEXT_ATTRIBUTES: ["name", "description"]
       ENUMERATED_FIELDS:
         scientific_domains:
           VOCABULARY_TYPE: "SCIENTIFIC_SUBDOMAIN"

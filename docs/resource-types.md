@@ -23,7 +23,7 @@ The following resource types have a normalisation branch implemented in `Catalog
 |---|---|---|
 | `service` | `/services` | `categories`, `scientific_domains`, `access_types`, `trl`, `jurisdiction`, `order_type` |
 | `training_resource` | `/trainingResources` | `target_groups`, `expertise_level`, `learning_resource_types`, `content_resource_types`, `qualifications`, `access_rights` |
-| `datasource` | `/datasources` | `scientific_domains`, `datasource_classification`, `jurisdiction`, `trl`, `order_type` |
+| `datasource` | `/datasources` | `scientific_domains`, `datasource_classification`, `research_entity_types`, `jurisdiction`, `trl`, `order_type` |
 | `organisation` | `/organisations` | `country`, `legal_status` |
 | `adapter` | `/adapters` | `programming_language` |
 | `interoperability_record` | `/interoperabilityRecords` | `status`, `domain`, `eosc_guideline_type` |
@@ -51,6 +51,7 @@ Vocabulary values are resolved at runtime by calling the EOSC API endpoint `/voc
 | TrainingResource | `TR_QUALIFICATION` | `qualifications` |
 | TrainingResource | `TARGET_USER` | `target_groups` |
 | Datasource | `DS_CLASSIFICATION` | `datasource_classification` |
+| Datasource | `DS_RESEARCH_ENTITY_TYPE` | `research_entity_types` |
 | Datasource | `DS_JURISDICTION` | `jurisdiction` |
 | Organisation | `PROVIDER_LEGAL_STATUS` | `legal_status` |
 | DeployableApplication | `SCIENTIFIC_SUBDOMAIN` | `scientific_domains` |

@@ -52,11 +52,12 @@ class CatalogueAPI(Registry):
         r["categories"] = subcategories
 
     def _reformat_service(self, service):
-        self._normalize_domain_category_fields(service)
-        service["access_types"] = service.pop("accessTypes", []) or []
-        service["order_type"] = [service.pop("orderType")] if service.get("orderType") else []
-        service["trl"] = [service.pop("trl")] if service.get("trl") else []
-        return service
+        s = dict(service)
+        self._normalize_domain_category_fields(s)
+        s["access_types"] = s.pop("accessTypes", []) or []
+        s["order_type"] = [s.pop("orderType")] if s.get("orderType") else []
+        s["trl"] = [s.pop("trl")] if s.get("trl") else []
+        return s
 
     # TODO change to one call
     def get_services_by_ids(self, ids, attributes=None, remove_generic_attributes=False):
@@ -222,7 +223,7 @@ class CatalogueAPI(Registry):
         elif resource_type == "datasource":
             self._normalize_domain_category_fields(r)
             r["datasource_classification"] = [r.pop("datasourceClassification")] if r.get("datasourceClassification") else []
-            r["research_product_types"] = r.pop("researchProductTypes", []) or []
+            r["research_entity_types"] = r.pop("researchEntityTypes", []) or []
             r["jurisdiction"] = [r.pop("jurisdiction")] if r.get("jurisdiction") else []
             r["trl"] = [r.pop("trl")] if r.get("trl") else []
             r["order_type"] = [r.pop("orderType")] if r.get("orderType") else []

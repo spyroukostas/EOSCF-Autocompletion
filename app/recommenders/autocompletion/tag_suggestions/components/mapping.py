@@ -55,6 +55,6 @@ def map_with_tags_corpus(candidate_tags, equal_threshold=None, similar_threshold
             exact_match_tag = tag_structures.get_tag(value=tag["text"])
 
             if not exact_match_tag.empty:
-                candidate_tags.at[index, "norm_popularity"] = exact_match_tag["norm_popularity"]
+                candidate_tags.at[index, "norm_popularity"] = exact_match_tag["norm_popularity"].iloc[0]
 
     return candidate_tags

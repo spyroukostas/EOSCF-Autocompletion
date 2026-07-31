@@ -92,6 +92,9 @@ class CatalogueAPI(Registry):
         # TODO currently we have hardcoded 8000 as maximum quantity
         response = self._get_request(f"{self.catalogue_base_url}/services?quantity=8000")
 
+        if response is None:
+            raise APIResponseFormatException("Catalogue API returned no response for services!")
+
         try:
             if reformat:
                 services = [self._reformat_service(item["result"]) for item in response["results"]]
@@ -181,8 +184,15 @@ class CatalogueAPI(Registry):
 
     def get_providers_names(self):
         # TODO currently we have hardcoded 8000 as maximum quantity
-        return [item["result"]["name"] for item in
-                self._get_request(f"{self.catalogue_base_url}/organisations?quantity=8000")["results"]]
+        response = self._get_request(f"{self.catalogue_base_url}/organisations?quantity=8000")
+
+        if response is None:
+            raise APIResponseFormatException("Catalogue API returned no response for organisations!")
+
+        try:
+            return [item["result"]["name"] for item in response["results"]]
+        except KeyError as e:
+            raise APIResponseFormatException(f"{e} does not exist in the response's fields")
 
     def _remove_general_attributes_from_services(self, services):
         attributes = ['scientific_domains', 'categories']
@@ -256,6 +266,9 @@ class CatalogueAPI(Registry):
     def get_resources_of_type(self, resource_type: str, attributes: list):
         camel = self._to_camel_case(resource_type)
         response = self._get_request(f"{self.catalogue_base_url}/{camel}s?quantity=8000")
+
+        if response is None:
+            raise APIResponseFormatException(f"Catalogue API returned no response for resource type '{resource_type}'!")
 
         try:
             resources = [self._reformat_resource(item["result"], resource_type) for item in response["results"]]

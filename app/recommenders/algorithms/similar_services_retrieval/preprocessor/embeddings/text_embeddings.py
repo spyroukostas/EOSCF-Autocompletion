@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone
 
 import spacy
 from app.databases.redis_db import (check_key_existence, delete_object,
@@ -19,6 +20,37 @@ def _embeddings_key(resource_type=None):
     if resource_type is None:
         return "TEXT_EMBEDDINGS"
     return f"{resource_type.upper()}_TEXT_EMBEDDINGS"
+
+
+def _embeddings_updated_at_key(resource_type=None):
+    return _embeddings_key(resource_type) + "_UPDATED_AT"
+
+
+def _embeddings_last_error_key(resource_type=None):
+    return _embeddings_key(resource_type) + "_LAST_ERROR"
+
+
+def record_text_embeddings_error(resource_type, error):
+    store_object(str(error), _embeddings_last_error_key(resource_type))
+
+
+def get_text_embeddings_status(resource_type=None):
+    """
+    Returns the freshness of the text embeddings cache for a resource type:
+    whether it exists, when it was last successfully updated, and the last
+    recorded harvest error (if any newer failure occurred after that update).
+    """
+    exists = bool(existence_text_embeddings(resource_type))
+    last_updated = get_object(_embeddings_updated_at_key(resource_type)) \
+        if check_key_existence(_embeddings_updated_at_key(resource_type)) else None
+    last_error = get_object(_embeddings_last_error_key(resource_type)) \
+        if check_key_existence(_embeddings_last_error_key(resource_type)) else None
+
+    return {
+        "exists": exists,
+        "last_updated": last_updated,
+        "last_error": last_error,
+    }
 
 
 def get_sbert_embeddings(service_text):
@@ -59,7 +91,9 @@ def create_text_embeddings(resource_type=None):
         id_col = "service_id"
 
     if resources.empty:
-        logger.warning(f"No resources found for resource type '{resource_type}'. Skipping text embeddings creation.")
+        message = f"No resources found for resource type '{resource_type}'. Skipping text embeddings creation."
+        logger.warning(message)
+        record_text_embeddings_error(resource_type, message)
         return []
 
 
@@ -79,6 +113,8 @@ def create_text_embeddings(resource_type=None):
         raise ValueError("Check config. Allowed methods to generate embeddings are: \"SBERT\"")
 
     store_object(text_embeddings, _embeddings_key(resource_type))
+    store_object(datetime.now(timezone.utc).isoformat(), _embeddings_updated_at_key(resource_type))
+    delete_object(_embeddings_last_error_key(resource_type))
 
     return text_embeddings
 
